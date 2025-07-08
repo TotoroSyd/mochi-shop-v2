@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +18,14 @@ interface CartProps {
 }
 
 const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem }: CartProps) => {
+  const navigate = useNavigate();
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleCheckout = () => {
+    navigate("/checkout", { state: { cartItems: items } });
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -109,7 +116,12 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem }: CartPr
                   <span className="text-lg font-semibold text-foreground">Total:</span>
                   <span className="text-2xl font-bold text-primary">${total.toFixed(2)}</span>
                 </div>
-                <Button className="w-full" variant="hero" size="lg">
+                <Button 
+                  className="w-full" 
+                  variant="hero" 
+                  size="lg"
+                  onClick={handleCheckout}
+                >
                   Proceed to Checkout
                 </Button>
                 <Button 
