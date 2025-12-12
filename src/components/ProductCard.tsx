@@ -1,3 +1,5 @@
+import { useContext } from "react";
+import { OrderContext } from "@/contexts/orderContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,10 +16,10 @@ export interface Product {
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
 }
 
-const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+const ProductCard = ({ product }: ProductCardProps) => {
+  const { addToCart } = useContext(OrderContext);
   return (
     <Card className="group cursor-pointer overflow-hidden hover:shadow-warm transition-all duration-300 transform hover:scale-105 bg-card border-border/50">
       <div className="relative overflow-hidden">
@@ -33,7 +35,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
-      
+
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -50,10 +52,10 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           ${product.price.toFixed(2)}
         </div>
       </CardContent>
-      
+
       <CardFooter className="p-4 pt-0">
         <Button
-          onClick={() => onAddToCart(product)}
+          onClick={() => addToCart(product)}
           className="w-full"
           variant="default"
         >
