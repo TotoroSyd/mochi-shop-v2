@@ -9,28 +9,64 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { CartItem } from "@/components/Cart";
 
 const checkoutSchema = z.object({
   // Customer Information
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  
+  firstName: z
+    .string()
+    .trim()
+    .min(1, "First name is required")
+    .regex(
+      /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/,
+      "First name can only contain letters, spaces, hyphens or apostrophes"
+    ),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, "Last name is required")
+    .regex(
+      /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/,
+      "Last name can only contain letters, spaces, hyphens or apostrophes"
+    ),
+  email: z.string().trim().email("Invalid email address"),
+  phone: z
+    .string()
+    .trim()
+    .refine((val) => {
+      const digits = val.replace(/\D/g, "");
+      return digits.length >= 10 && digits.length <= 15;
+    }, "Phone number must contain only digits and be between 10 and 15 digits")
+    .transform((val) => val.replace(/\D/g, "")),
+
   // Shipping Address
-  address: z.string().min(1, "Address is required"),
+  address: z.string().trim().nonempty("Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   zipCode: z.string().min(5, "ZIP code must be at least 5 digits"),
   country: z.string().min(1, "Country is required"),
-  
+
   // Payment Information
   cardNumber: z.string().min(16, "Card number must be 16 digits"),
-  expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, "Invalid expiry date (MM/YY)"),
+  expiryDate: z
+    .string()
+    .regex(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, "Invalid expiry date (MM/YY)"),
   cvv: z.string().min(3, "CVV must be at least 3 digits"),
   cardName: z.string().min(1, "Cardholder name is required"),
 });
@@ -42,10 +78,13 @@ const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  
+
   // Get cart items from location state
   const cartItems: CartItem[] = location.state?.cartItems || [];
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
   const subtotal = total;
   const shipping = 5.99;
   const tax = total * 0.08;
@@ -54,19 +93,20 @@ const Checkout = () => {
   const form = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
-      country: "United States",
+      country: "Australia",
     },
   });
 
   const onSubmit = async (data: CheckoutForm) => {
     setIsLoading(true);
-    
+
     // Simulate payment processing
     setTimeout(() => {
       setIsLoading(false);
       toast({
         title: "Order placed successfully!",
-        description: "Thank you for your purchase. You will receive a confirmation email shortly.",
+        description:
+          "Thank you for your purchase. You will receive a confirmation email shortly.",
       });
       navigate("/", { replace: true });
     }, 2000);
@@ -77,7 +117,9 @@ const Checkout = () => {
       <div className="min-h-screen bg-background pt-20">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-4">Your cart is empty</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-4">
+              Your cart is empty
+            </h1>
             <Button onClick={() => navigate("/")} variant="elegant">
               Continue Shopping
             </Button>
@@ -108,7 +150,10 @@ const Checkout = () => {
           {/* Left Column - Forms */}
           <div className="space-y-8">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
                 {/* Customer Information */}
                 <Card>
                   <CardHeader>
@@ -150,7 +195,11 @@ const Checkout = () => {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="john@example.com" {...field} />
+                            <Input
+                              type="email"
+                              placeholder="john@example.com"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -239,14 +288,19 @@ const Checkout = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Country</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select country" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="United States">United States</SelectItem>
+                                <SelectItem value="United States">
+                                  United States
+                                </SelectItem>
                                 <SelectItem value="Canada">Canada</SelectItem>
                                 <SelectItem value="Japan">Japan</SelectItem>
                               </SelectContent>
@@ -275,7 +329,10 @@ const Checkout = () => {
                         <FormItem>
                           <FormLabel>Card Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="1234 5678 9012 3456" {...field} />
+                            <Input
+                              placeholder="1234 5678 9012 3456"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -350,9 +407,13 @@ const Checkout = () => {
                       />
                       <div className="flex-1">
                         <h4 className="font-medium text-sm">{item.name}</h4>
-                        <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Qty: {item.quantity}
+                        </p>
                       </div>
-                      <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-medium">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </p>
                     </div>
                   ))}
                 </div>
